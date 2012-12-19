@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8 "/>
+        <meta http-equiv="Content-Style-Type" content="text/css" />
+        <meta http-equiv="Content-Script-Type" content="text/javascript" />
+        <title>TimeRecorder</title>
+        <link rel="stylesheet" type="text/css" href="./main.css" media="all">
+        <script type="text/javascript" src="./jquery.1.8.3.full.js"></script>
+        <script type="text/javascript" src="./main.js"></script>
+    </head>
+    <body>
+
+        <div id="container">
+            <ul class="tab">
+                <li><a href="#tab0" class="selected">記録タブ</a></li>
+                <li><a href="#tab1">日次サマリー</a></li>
+                <li><a href="#tab2">月次サマリー</a></li>
+            </ul>
+            <ul class="panel">
+                <li id="tab0">
+                	工事中・・・<br>
+                	    	<a href="#floatWindow" class="open">項目の設定</a>
+					<div id="floatWindow">
+						<a href="./main.html" class="close"><img src="./images/close.png" alt="閉じる" /></a>
+						<dl>
+							<dt>項目の設定</dt>
+							<dd>このウィンドウでタスクなどの設定や環境設定を行う。</dd>
+						</dl>
+					</div><br>
+                	<input type="button" name="buttun0" value="【 スタート 】
+
+ミーティング
+
+00:00:00">
+                	<input type="button" name="buttun1" value="【 スタート 】
+
+ミーティング
+
+00:00:00">
+                	<input type="button" name="buttun0" value="【 スタート 】
+
+ミーティング
+
+00:00:00">
+                	<input type="button" name="buttun1" value="【 スタート 】
+
+ミーティング
+
+00:00:00">
+                	<input type="button" name="buttun0" value="【 スタート 】
+
+ミーティング
+
+00:00:00">
+                	<input type="button" name="buttun1" value="【 スタート 】
+
+ミーティング
+
+00:00:00">
+                	<input type="button" name="buttun0" value="【 スタート 】
+
+ミーティング
+
+00:00:00">
+                	<input type="button" name="buttun1" value="【 スタート 】
+
+ミーティング
+
+00:00:00">
+                	<input type="button" name="buttun0" value="【 スタート 】
+
+ミーティング
+
+00:00:00">
+                	<input type="button" name="buttun1" value="【 スタート 】
+
+ミーティング
+
+00:00:00">
+                </li>
+                <li id="tab1">
+                	<p>表示日：
+                		<select name="date">
+                			<option value="12_15">12月15日</option>
+                			<option value="12_16">12月16日</option>
+                			<option value="12_17">12月17日</option>
+                			<option value="12_18">12月18日</option>
+                			<option value="12_19">12月19日</option>
+                			<option value="12_20">12月20日</option>
+                			<option value="12_21">12月21日</option>
+                		</select>
+                	</p><br>
+                	<p>工事中・・・</p>
+                </li>
+                <li id="tab2">
+                	<p>表示月度：
+                		<select name="month">
+                			<option value="4">4月</option>
+                			<option value="5">5月</option>
+                			<option value="6">6月</option>
+                			<option value="7">7月</option>
+                			<option value="8">8月</option>
+                			<option value="9">9月</option>
+                			<option value="10">10月</option>
+                			<option value="11">11月</option>
+                			<option value="12">12月</option>
+                		</select>
+                	</p><br>
+                	<p>工事中・・・</p>
+                </li>
+            </ul>
+        </div>
+    </body>
+</html>

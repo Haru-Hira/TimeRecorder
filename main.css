@@ -1,0 +1,91 @@
+
+*{
+	margin:0;
+	padding:0;
+}
+#container{
+	width:1200px;
+	margin:50px auto;
+}
+ul.tab{
+	padding:0;
+}
+ul.tab li{
+	list-style-type:none;
+	width:400px;
+	height:40px;
+	float:left;
+}
+
+ul.tab li a{
+	outline:none;
+	background:url("./images/tab.jpg");
+	display:block;
+	color:blue;
+	line-height:40px;
+	text-align:center;
+	font-size: 25px;
+}
+ul.tab li a.selected{
+	background:url("./images/tab_selected.jpg");
+	text-decoration:none;
+	color:#333;
+	cursor:default;
+}
+ul.panel{
+	clear:both;
+	border:1px solid #9FB7D4;
+	border-top:none;
+	padding:0;
+}
+ul.panel li{
+	list-style-type:none;
+	padding:10px;
+	text-indent:1em;
+	color:#333;
+}
+ul.panel li input{
+	width: 250px;
+	height: 250px;
+	font-size: 30px;
+	margin: 15px;
+}
+
+
+
+#floatWindow{
+	display:none;
+	position:absolute;
+	width:1000px;
+	height:800px;
+	top:100px;
+	left:100px;
+}
+#floatWindow a.close{
+	position:absolute;
+	right:20px;
+	top:1px;
+}
+#floatWindow a.close img{
+	border:none;
+}
+#floatWindow dl{
+	width:100%;
+	height:100%;
+	background:url("./images/floatWindow.png");
+	margin:0;
+}
+#floatWindow dl dt{
+	height:25px;
+	line-height:25px;
+	text-indent:1em;
+	color:white;
+	font-weight:bold;
+	cursor:move;
+}
+#floatWindow dl dd{
+	margin:0;
+	padding:2em;
+	line-height:1.5;
+	text-indent:1em;
+}
