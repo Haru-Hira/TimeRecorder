@@ -1,4 +1,64 @@
+var timers = new Array();
+
 $(function(){
+  var timersManagementArray = new Array();
+
+  var Timer = function(id){
+    var id = id;
+    var startTime = 0;
+    var recentTime = 0;
+    var offsetTime = 0;
+    var initializedFlag = false;
+
+    this.changeTimerState = function(flg){
+      hourStr = "";
+      minStr = "";
+      secStr = "";
+
+      if(!initializedFlag)
+      {
+        startDate = new Date();
+        startTime = startDate.getTime();
+        initializedFlag = true;
+      }
+      recentDate = new Date();
+      recentTime = recentDate.getTime();
+
+      datet = parseInt((offsetTime + recentTime - startTime) / 1000);
+      hour = parseInt(datet / 3600);
+      min = parseInt((datet / 60) % 60);
+      sec = datet % 60;
+
+      if (hour < 10) {
+        hourStr += "0" + hour;
+      } else {
+        hourStr += hour;
+      }
+      if (min < 10) {
+        minStr += "0" + min;
+      } else {
+        minStr += min;
+      }
+      if (sec < 10) {
+        secStr += "0" + sec;
+      } else {
+        secStr += sec;
+      }
+      if(flg == 1)
+      {
+        $("ul.panel li#tab0 input#button" + id).attr("value", "【工数計測中】\n\nミーティング\n\n"
+          + hourStr + ":" + minStr + ":" + secStr);
+      }
+      else if(flg == 0)
+      {
+        $("ul.panel li#tab0 input#button" + id).attr("value", "【 停止中 】\n\nミーティング\n\n"
+          + hourStr + ":" + minStr + ":" + secStr);
+        offsetTime += recentTime - startTime;
+        initializedFlag = false;
+      }
+    }
+  }
+
 	$("ul.panel li:not("+$("ul.tab li a.selected").attr("href")+")").hide()
 	$("ul.tab li a").click(function(){
 		$("ul.tab li a").removeClass("selected");
@@ -8,11 +68,13 @@ $(function(){
 		return false;
 	});
 
-	//$("selected").change(function(){
-//	});
-});
+  for(var i = 0; i < 12; i++){
+    timers.push(new Timer(i));
+    $("ul.panel li#tab0").append($('<input type="button">').attr("id","button" + i)
+      .attr("value", "【 停止中 】\n\nミーティング\n\n00:00:00").addClass("stop_state"));
+    timersManagementArray.push("");
+  }
 
-$(function(){
 	$("a.open").click(function(){
 		$("#floatWindow").fadeIn("fast");
 		return false;
@@ -37,27 +99,41 @@ $(function(){
 	}).mouseup(function(){
 		$(document).unbind("mousemove");
 	});
-});
 
-$(function(){
-	$("ul li input").click(function(){
+	$("ul.panel li#tab0 input").click(function(){
 		if($(this).hasClass("stop_state"))
 		{
-      $("ul li input").each(function(){
-        $(this).css("background-image", "url(./images/stop_state.png)");
-        $(this).removeClass("running_state").addClass("stop_state");
+      $("ul.panel li#tab0 input").each(function(){
+        if($(this).hasClass("running_state"))
+        {
+          $(this).css("background-image", "url(./images/stop_state.png)");
+          $(this).removeClass("running_state").addClass("stop_state");
+          var id = parseInt($(this).attr("id").substring(6));
+          clearInterval(timersManagementArray[id]);
+          timers[id].changeTimerState(0);
+        }
       });
 			$(this).css("background-image", "url(./images/running_state.png)");
 			$(this).removeClass("stop_state").addClass("running_state");
+      var id = parseInt($(this).attr("id").substring(6));
+      timersManagementArray[id] = setInterval("timers[" + id + "].changeTimerState(1)", 100);
 		}
 		else
 		{
 			$(this).css("background-image", "url(./images/stop_state.png)");
 			$(this).removeClass("running_state").addClass("stop_state");
+      var id = parseInt($(this).attr("id").substring(6));
+      clearInterval(timersManagementArray[id]);
+      timers[id].changeTimerState(0);
 		}
 	});
 });
 
+
+
+
+//DigitalTimer
+/*
 $(function(){
 	var _context;
 var _hour1;
@@ -88,7 +164,7 @@ var DIGIT = {
   'clear':{'x':5,'y':5,'w':40,'h':70}
 };
 
-function drawCircle(x) {
+function drawColon(x) {
   _context.beginPath();
   _context.arc(x, 25, 5, 0, Math.PI*2, false);
   _context.fill();
@@ -146,8 +222,8 @@ function interval() {
   _min2 = min2;
   _sec1 = sec1;
   _sec2 = sec2;
-
 }
+
 function clearDigit(t) {
   var c = DIGIT['clear'];
   var x = t + c['x'];
@@ -155,7 +231,6 @@ function clearDigit(t) {
 }
 
 function draw(num, t) {
-
   _context.beginPath();
 
   clearDigit(t);
@@ -169,7 +244,6 @@ function draw(num, t) {
 }
 
 function drawParts(x, y, l) {
-
   _context.moveTo(x, y);
   if (l) {
     _context.lineTo(x + 5, y + 5);
@@ -185,15 +259,14 @@ function drawParts(x, y, l) {
     _context.lineTo(x + 5, y + 5);
   }
   _context.closePath();
-
 }
 _context = document.getElementById('canvas').getContext('2d');
 
-drawCircle(115);
-drawCircle(240);
+drawColon(115);
+drawColon(240);
 
 interval();
 
 setInterval(interval, 1000);
-
 });
+*/
