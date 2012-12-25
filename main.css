@@ -4,7 +4,7 @@
 	padding:0;
 }
 #container{
-	width:1200px;
+	width:930px;
 	margin:50px auto;
 }
 ul.tab{
@@ -12,7 +12,7 @@ ul.tab{
 }
 ul.tab li{
 	list-style-type:none;
-	width:400px;
+	width:310px;
 	height:40px;
 	float:left;
 }
@@ -24,13 +24,17 @@ ul.tab li a{
 	color:blue;
 	line-height:40px;
 	text-align:center;
-	font-size: 25px;
+	font-size: 20px;
+	-moz-background-size:100% 100%;
+	background-size:100% 100%;
 }
 ul.tab li a.selected{
 	background:url("./images/tab_selected.jpg");
 	text-decoration:none;
 	color:#333;
 	cursor:default;
+	-moz-background-size:100% 100%;
+	background-size:100% 100%;
 }
 ul.panel{
 	clear:both;
@@ -46,12 +50,13 @@ ul.panel li{
 }
 ul.panel li input{
 	background-image:url("./images/stop_state.png");
-	-moz-background-size:contain;
-	background-size:contain;
-	width: 200px;
-	height: 200px;
-	font-size: 30px;
+	-moz-background-size:100% 100%;
+	background-size:100% 100%;
+	width: 150px;
+	height: 150px;
+	font-size: 20px;
 	margin: 15px;
+	border: 0px;
 }
 
 ul.panel li input:hover{
