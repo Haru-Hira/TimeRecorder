@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8 "/>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <meta http-equiv="Content-Style-Type" content="text/css" />
         <meta http-equiv="Content-Script-Type" content="text/javascript" />
         <title>TimeRecorder</title>
@@ -20,13 +20,17 @@
             <ul class="panel">
                 <li id="tab0">
                 	工事中・・・<br>
-                	    	<a href="#floatWindow" class="open">項目の設定</a>
+                	<a href="#floatWindow" class="open">項目の設定</a>
 					<div id="floatWindow">
 						<a href="./main.html" class="close"><img src="./images/close.png" alt="閉じる" /></a>
 						<dl>
-							<dt>項目の設定</dt>
-							<dd>このウィンドウでタスクなどの設定や環境設定を行う。</dd>
+							<dt>項目設定</dt>
+							<dd>このウィンドウでタスクなどの設定や環境設定を行う。<br>
+                                <input type="button" class="ok_button" id="task_edit_ok" value="OK">
+                                <input type="button" class="cancel_button" id="task_edit_cancel" value="キャンセル">
+                            </dd>
 						</dl>
+
 					</div><br>
                     現在の時刻 ： <canvas id="canvas" height="80" width="355"></canvas><br>
                 </li>

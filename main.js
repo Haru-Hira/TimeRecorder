@@ -6,7 +6,7 @@ $(function(){
 
   var Timer = function(id, taskName){
     var id = id;
-    var taskName = taskName;
+    var taskName = "\n" + taskName + "\n";
     var startTime = 0;
     var recentTime = 0;
     var offsetTime = 0;
@@ -14,6 +14,11 @@ $(function(){
     var hourStr = "00";
     var minStr = "00";
     var secStr = "00";
+
+    this.setTaskName = function(Name){
+      taskName = "\n" + Name + "\n";
+      $("ul.panel li#tab0 input#button" + id).attr("value", this.initialTimerLabel("stop_state"));
+    }
 
     this.initialTimerLabel = function(state){
       var label = "";
@@ -85,14 +90,19 @@ $(function(){
 	});
 
   for(var i = 0; i < NumOfTimers; i++){
-    timers.push(new Timer(i, "\nミーティング\n"));
+    $("ul.panel li#tab0 div dl dd input.ok_button").before($('<input type="text">').attr("id", "task" + i)
+      .attr("value", "タスク" + i).addClass("task")).before($('<br>'));
+  }
+
+  for(var i = 0; i < NumOfTimers; i++){
+    timers.push(new Timer(i, $("input#task" + i).attr("value")));
     $("ul.panel li#tab0").append($('<input type="button">').attr("id","button" + i)
-      .attr("value", timers[i].initialTimerLabel("stop_state")).addClass("stop_state"));
+      .attr("value", timers[i].initialTimerLabel("stop_state")).addClass("timer").addClass("stop_state"));
     timersManagementArray.push("");
   }
-  timers.push(new Timer(parseInt(NumOfTimers), "\nその他(Auto)\n"));
+  timers.push(new Timer(parseInt(NumOfTimers), "その他(Auto)"));
   $("ul.panel li#tab0").append($('<input type="button">').attr("id","button" + NumOfTimers)
-    .attr("value", timers[NumOfTimers].initialTimerLabel("stop_state")).addClass("stop_state"));
+    .attr("value", timers[NumOfTimers].initialTimerLabel("stop_state")).addClass("timer").addClass("stop_state"));
   timersManagementArray.push("");
 
 	$("a.open").click(function(){
@@ -104,6 +114,17 @@ $(function(){
 		$("#floatWindow").fadeOut("fast");
 		return false;
 	});
+
+  $("#floatWindow input#task_edit_ok").click(function(){
+    for(var i = 0; i < NumOfTimers; i++){
+      timers[i].setTaskName($("input#task" + i).attr("value"));
+    }
+  });
+
+  $("#floatWindow input#task_edit_cancel").click(function(){
+    $("#floatWindow").fadeOut("fast");
+    return false;
+  });
 
 	$("#floatWindow dl dt").mousedown(function(e){
 		$("#floatWindow")
@@ -120,32 +141,28 @@ $(function(){
 		$(document).unbind("mousemove");
 	});
 
-	$("ul.panel li#tab0 input").click(function(){
+	$("ul.panel li#tab0 input.timer").click(function(){
 		if($(this).hasClass("stop_state"))
 		{
       $("ul.panel li#tab0 input").each(function(){
         if($(this).hasClass("running_state"))
         {
-          $(this).css("background-image", "url(./images/stop_state.png)");
           $(this).removeClass("running_state").addClass("stop_state");
           var id = parseInt($(this).attr("id").substring(6));
           clearInterval(timersManagementArray[id]);
           timers[id].changeTimerState(0);
         }
       });
-			$(this).css("background-image", "url(./images/running_state.png)");
 			$(this).removeClass("stop_state").addClass("running_state");
       var id = parseInt($(this).attr("id").substring(6));
       timersManagementArray[id] = setInterval("timers[" + id + "].changeTimerState(1)", 100);
 		}
 		else if($(this).attr("id").substring(6) != NumOfTimers){
-      $(this).css("background-image", "url(./images/stop_state.png)");
       $(this).removeClass("running_state").addClass("stop_state");
       var id = parseInt($(this).attr("id").substring(6));
       clearInterval(timersManagementArray[id]);
       timers[id].changeTimerState(0);
 
-      $("ul.panel li#tab0 input#button" + NumOfTimers).css("background-image", "url(./images/running_state.png)");
       $("ul.panel li#tab0 input#button" + NumOfTimers).removeClass("stop_state").addClass("running_state");
       timersManagementArray[parseInt(NumOfTimers)] = setInterval("timers[" + NumOfTimers + "].changeTimerState(1)", 100);
 		}

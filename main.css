@@ -48,8 +48,20 @@ ul.panel li{
 	text-indent:1em;
 	color:#333;
 }
-ul.panel li input{
+
+ul.panel li input.stop_state{
 	background-image:url("./images/stop_state.png");
+	-moz-background-size:100% 100%;
+	background-size:100% 100%;
+	width: 150px;
+	height: 150px;
+	font-size: 20px;
+	margin: 15px;
+	border: 0px;
+}
+
+ul.panel li input.running_state{
+	background-image:url("./images/running_state.png");
 	-moz-background-size:100% 100%;
 	background-size:100% 100%;
 	width: 150px;
@@ -98,8 +110,21 @@ ul.panel li input:hover{
 #floatWindow dl dd{
 	margin:0;
 	padding:2em;
-	line-height:1.5;
+	line-height:3;
 	text-indent:1em;
+}
+
+#floatWindow dl dd input[type="button"]{
+	width: 80px;
+	height: 30px;
+	font-size: 18px;
+	margin: 10px;
+}
+
+#floatWindow dl dd input[type="text"]{
+	width: 600px;
+	height: 30px;
+	font-size: 20px;
 }
 
 canvas { background-color: #DDDDDD; font: 30px sans-serif; }
