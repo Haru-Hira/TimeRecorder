@@ -6,7 +6,7 @@ $(function(){
 
   var Timer = function(id, taskName){
     var id = id;
-    var taskName = "\n" + taskName + "\n";
+    var state = "stop_state";
     var startTime = 0;
     var recentTime = 0;
     var offsetTime = 0;
@@ -15,12 +15,51 @@ $(function(){
     var minStr = "00";
     var secStr = "00";
 
-    this.setTaskName = function(Name){
-      taskName = "\n" + Name + "\n";
-      $("ul.panel li#tab0 input#button" + id).attr("value", this.initialTimerLabel("stop_state"));
+    this.setTaskName = function(taskName){
+      var escaped_str = escape(taskName);
+      var str_pivot = 0;
+      var half_count = 0;
+      var str_out = "";
+      for (var i = 0; i < escaped_str.length; i++) {
+        if(half_count == 15 || half_count == 16 || half_count == 31 || half_count == 32){
+          str_out += "\n";
+          if(half_count == 15 || half_count == 31){
+            half_count++;
+          }
+        }
+        if(46 < half_count){
+          str_out += "...";
+          break;
+        }
+        if (escaped_str.charAt(i) == "%") {
+          if (escaped_str.charAt(i+1) == "u") {
+            i += 5;
+            half_count += 2;
+          }else{
+            i += 2;
+            half_count++;
+          }
+        }else{
+          half_count++;
+        }
+        str_out += taskName.substring(str_pivot, ++str_pivot);
+      }
+      if(half_count <= 16){
+        return "\n" + str_out + "\n";
+      }else if(half_count <= 32){
+        return str_out + "\n";
+      }else{
+        return str_out;
+      }
+    }
+    var taskName = this.setTaskName(taskName);
+
+    this.setTimerLabel = function(Name){
+      taskName = this.setTaskName(Name);
+      $("ul.panel li#tab0 input#button" + id).attr("value", this.getTimerLabel());
     }
 
-    this.initialTimerLabel = function(state){
+    this.getTimerLabel = function(){
       var label = "";
       if(state == "stop_state")
       {
@@ -69,11 +108,13 @@ $(function(){
       }
       if(flg == 1)
       {
-        $("ul.panel li#tab0 input#button" + id).attr("value", this.initialTimerLabel("running_state"));
+        state = "running_state";
+        $("ul.panel li#tab0 input#button" + id).attr("value", this.getTimerLabel());
       }
       else if(flg == 0)
       {
-        $("ul.panel li#tab0 input#button" + id).attr("value", this.initialTimerLabel("stop_state"));
+        state = "stop_state";
+        $("ul.panel li#tab0 input#button" + id).attr("value", this.getTimerLabel());
         offsetTime += recentTime - startTime;
         initializedFlag = false;
       }
@@ -90,20 +131,23 @@ $(function(){
 	});
 
   for(var i = 0; i < NumOfTimers; i++){
-    $("ul.panel li#tab0 div dl dd input.ok_button").before($('<input type="text">').attr("id", "task" + i)
-      .attr("value", "タスク" + i).addClass("task")).before($('<br>'));
+    $("ul.panel li#tab0 div dl dd").append($('<br>')).append($('<input type="text">').attr("id", "task" + i)
+      .attr("value", "タスク" + i).addClass("task"));
   }
 
-  for(var i = 0; i < NumOfTimers; i++){
-    timers.push(new Timer(i, $("input#task" + i).attr("value")));
+  for(var i = 0; i < NumOfTimers + 1; i++){
+    if(i == NumOfTimers)
+    {
+      timers.push(new Timer(NumOfTimers, "その他(Auto)"));
+    }
+    else
+    {
+      timers.push(new Timer(i, $("input#task" + i).attr("value")));
+    }
     $("ul.panel li#tab0").append($('<input type="button">').attr("id","button" + i)
-      .attr("value", timers[i].initialTimerLabel("stop_state")).addClass("timer").addClass("stop_state"));
+      .attr("value", timers[i].getTimerLabel()).addClass("timer").addClass("stop_state"));
     timersManagementArray.push("");
   }
-  timers.push(new Timer(parseInt(NumOfTimers), "その他(Auto)"));
-  $("ul.panel li#tab0").append($('<input type="button">').attr("id","button" + NumOfTimers)
-    .attr("value", timers[NumOfTimers].initialTimerLabel("stop_state")).addClass("timer").addClass("stop_state"));
-  timersManagementArray.push("");
 
 	$("a.open").click(function(){
 		$("#floatWindow").fadeIn("fast");
@@ -117,7 +161,7 @@ $(function(){
 
   $("#floatWindow input#task_edit_ok").click(function(){
     for(var i = 0; i < NumOfTimers; i++){
-      timers[i].setTaskName($("input#task" + i).attr("value"));
+      timers[i].setTimerLabel($("input#task" + i).attr("value"));
     }
   });
 
@@ -141,32 +185,38 @@ $(function(){
 		$(document).unbind("mousemove");
 	});
 
-	$("ul.panel li#tab0 input.timer").click(function(){
+	$("input.timer").click(function(){
+    var button_id = parseInt($(this).attr("id").substring(6));
 		if($(this).hasClass("stop_state"))
 		{
-      $("ul.panel li#tab0 input").each(function(){
+      $("input.timer").each(function(){
         if($(this).hasClass("running_state"))
         {
-          $(this).removeClass("running_state").addClass("stop_state");
-          var id = parseInt($(this).attr("id").substring(6));
-          clearInterval(timersManagementArray[id]);
-          timers[id].changeTimerState(0);
+          changeState(parseInt($(this).attr("id").substring(6)));
         }
       });
-			$(this).removeClass("stop_state").addClass("running_state");
-      var id = parseInt($(this).attr("id").substring(6));
-      timersManagementArray[id] = setInterval("timers[" + id + "].changeTimerState(1)", 100);
+      changeState(button_id);
 		}
-		else if($(this).attr("id").substring(6) != NumOfTimers){
-      $(this).removeClass("running_state").addClass("stop_state");
-      var id = parseInt($(this).attr("id").substring(6));
-      clearInterval(timersManagementArray[id]);
-      timers[id].changeTimerState(0);
-
-      $("ul.panel li#tab0 input#button" + NumOfTimers).removeClass("stop_state").addClass("running_state");
-      timersManagementArray[parseInt(NumOfTimers)] = setInterval("timers[" + NumOfTimers + "].changeTimerState(1)", 100);
+		else if(button_id != NumOfTimers){
+      changeState(button_id);
+      changeState(NumOfTimers);
 		}
 	});
+
+  var changeState = function(button_id){
+    var input_button = $("#button" + button_id);
+    if(input_button.hasClass("stop_state"))
+    {
+      input_button.removeClass("stop_state").addClass("running_state");
+      timersManagementArray[button_id] = setInterval("timers[" + button_id + "].changeTimerState(1)", 100);
+    }
+    else if(input_button.hasClass("running_state"))
+    {
+      input_button.removeClass("running_state").addClass("stop_state");
+      clearInterval(timersManagementArray[button_id]);
+      timers[button_id].changeTimerState(0);
+    }
+  }
 });
 
 //DigitalTimer
