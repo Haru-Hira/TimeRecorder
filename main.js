@@ -1,11 +1,12 @@
 var timers = new Array();
-var NumOfTimers = 12; //ToDo 項目リストからのデータ読み込み
 
 $(function(){
   var timersManagementArray = new Array();
+  var savingTimer;
 
   var Timer = function(id, taskName){
     var id = id;
+    var rawTaskName = "";
     var state = "stop_state";
     var startTime = 0;
     var recentTime = 0;
@@ -16,6 +17,7 @@ $(function(){
     var secStr = "00";
 
     this.setTaskName = function(taskName){
+      rawTaskName = taskName;
       var escaped_str = escape(taskName);
       var str_pivot = 0;
       var half_count = 0;
@@ -116,8 +118,29 @@ $(function(){
         state = "stop_state";
         $("ul.panel li#tab0 input#button" + id).attr("value", this.getTimerLabel());
         offsetTime += recentTime - startTime;
+        startTime = 0;
+        recentTime = 0;
         initializedFlag = false;
       }
+    }
+
+    this.loadFromLocalStorage = function(dayString){
+      var savedTime = parseInt(localStorage.getItem(dayString + "_" + rawTaskName));
+      if (isNaN(savedTime))
+      {
+        offsetTime = 0;
+      }else
+      {
+        offsetTime = savedTime;
+      }
+      console.log(dayString + "_" + rawTaskName + localStorage.getItem(dayString + "_" + rawTaskName));
+      //localStorage.clear();
+    }
+
+    this.saveToLocalStorage = function(dayString){
+      localStorage.setItem(dayString + "_" + rawTaskName, offsetTime + recentTime - startTime);
+      console.log(dayString + "_" + rawTaskName + localStorage.getItem(dayString + "_" + rawTaskName));
+      //localStorage.clear();
     }
   }
 
@@ -130,24 +153,51 @@ $(function(){
 		return false;
 	});
 
-  for(var i = 0; i < NumOfTimers; i++){
-    $("ul.panel li#tab0 div dl dd").append($('<br>')).append($('<input type="text">').attr("id", "task" + i)
-      .attr("value", "タスク" + i).addClass("task"));
-  }
+  var NumOfTimers = 0;
+  $.get('./database.csv',function(database){
+    var csv = $.csv()(database);
+    $(csv).each(function(index){
+      if(index != 0 && this[1] != "その他(Auto)"){
+        $("ul.panel li#tab0 div dl dd").append($('<br>')).append($('<input type="text">')
+          .attr("id", "task" + NumOfTimers).attr("value", this[1]).addClass("task"));
+        NumOfTimers++;
+      }
+    });
 
-  for(var i = 0; i < NumOfTimers + 1; i++){
-    if(i == NumOfTimers)
-    {
-      timers.push(new Timer(NumOfTimers, "その他(Auto)"));
+    for(var i = 0; i < NumOfTimers + 1; i++){
+      if(i == NumOfTimers)
+      {
+        timers.push(new Timer(NumOfTimers, "その他(Auto)"));
+      }
+      else
+      {
+        timers.push(new Timer(i, $("input#task" + i).attr("value")));
+      }
+      $("ul.panel li#tab0").append($('<input type="button">').attr("id","button" + i)
+        .attr("value", timers[i].getTimerLabel()).addClass("timer").addClass("stop_state"));
+      timers[i].loadFromLocalStorage(getDayString());
+      timers[i].changeTimerState(0);
+      timersManagementArray.push("");
     }
-    else
-    {
-      timers.push(new Timer(i, $("input#task" + i).attr("value")));
-    }
-    $("ul.panel li#tab0").append($('<input type="button">').attr("id","button" + i)
-      .attr("value", timers[i].getTimerLabel()).addClass("timer").addClass("stop_state"));
-    timersManagementArray.push("");
-  }
+
+    $("input.timer").click(function(){
+      var button_id = parseInt($(this).attr("id").substring(6));
+      if($(this).hasClass("stop_state"))
+      {
+        $("input.timer").each(function(){
+          if($(this).hasClass("running_state"))
+          {
+            changeState(parseInt($(this).attr("id").substring(6)));
+          }
+        });
+        changeState(button_id);
+      }
+      else if(button_id != NumOfTimers){
+        changeState(button_id);
+        changeState(NumOfTimers);
+      }
+    });
+  });
 
 	$("a.open").click(function(){
 		$("#floatWindow").fadeIn("fast");
@@ -185,39 +235,43 @@ $(function(){
 		$(document).unbind("mousemove");
 	});
 
-	$("input.timer").click(function(){
-    var button_id = parseInt($(this).attr("id").substring(6));
-		if($(this).hasClass("stop_state"))
-		{
-      $("input.timer").each(function(){
-        if($(this).hasClass("running_state"))
-        {
-          changeState(parseInt($(this).attr("id").substring(6)));
-        }
-      });
-      changeState(button_id);
-		}
-		else if(button_id != NumOfTimers){
-      changeState(button_id);
-      changeState(NumOfTimers);
-		}
-	});
-
   var changeState = function(button_id){
     var input_button = $("#button" + button_id);
     if(input_button.hasClass("stop_state"))
     {
       input_button.removeClass("stop_state").addClass("running_state");
       timersManagementArray[button_id] = setInterval("timers[" + button_id + "].changeTimerState(1)", 100);
+      savingTimer = setInterval("timers[" + button_id + "].saveToLocalStorage(getDayString())", 500);
     }
     else if(input_button.hasClass("running_state"))
     {
       input_button.removeClass("running_state").addClass("stop_state");
       clearInterval(timersManagementArray[button_id]);
       timers[button_id].changeTimerState(0);
+      clearInterval(savingTimer);
     }
   }
 });
+
+function getDayString(){
+  var date = new Date();
+  var year = date.getYear();
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  if (year < 2000)
+  {
+    year += 1900;
+  }
+  if (month < 10)
+  {
+    month = "0" + month;
+  }
+  if (day < 10)
+  {
+    day = "0" + day;
+  }
+  return "" + year + "/" + month + "/" + day;
+}
 
 //DigitalTimer
 $(function(){
