@@ -57,8 +57,14 @@ $(function(){
     var taskName = this.setTaskName(taskName);
 
     this.setTimerLabel = function(Name){
-      taskName = this.setTaskName(Name);
-      $("ul.panel li#tab0 input#button" + id).attr("value", this.getTimerLabel());
+      if(rawTaskName != Name)
+      {
+        var dayString = getDayString();
+        this.removeFromLocalStorage(dayString);
+        taskName = this.setTaskName(Name);
+        $("ul.panel li#tab0 input#button" + id).attr("value", this.getTimerLabel());
+        this.saveToLocalStorage(dayString);
+      }
     }
 
     this.getTimerLabel = function(){
@@ -133,14 +139,18 @@ $(function(){
       {
         offsetTime = savedTime;
       }
-      console.log(dayString + "_" + rawTaskName + localStorage.getItem(dayString + "_" + rawTaskName));
       //localStorage.clear();
+      //console.log("Load : " + dayString + "_" + rawTaskName + localStorage.getItem(dayString + "_" + rawTaskName));
     }
 
     this.saveToLocalStorage = function(dayString){
       localStorage.setItem(dayString + "_" + rawTaskName, offsetTime + recentTime - startTime);
-      console.log(dayString + "_" + rawTaskName + localStorage.getItem(dayString + "_" + rawTaskName));
-      //localStorage.clear();
+      //console.log("Save : " + dayString + "_" + rawTaskName + localStorage.getItem(dayString + "_" + rawTaskName));
+    }
+
+    this.removeFromLocalStorage = function(dayString){
+      localStorage.removeItem(dayString + "_" + rawTaskName);
+      //console.log("Remove : " + dayString + "_" + rawTaskName);
     }
   }
 
@@ -155,15 +165,27 @@ $(function(){
 
   var NumOfTimers = 0;
   $.get('./database.csv',function(database){
-    var csv = $.csv()(database);
-    $(csv).each(function(index){
-      if(index != 0 && this[1] != "その他(Auto)"){
+    var dayString = getDayString();
+    for(var i = 0; i < localStorage.length; i++){
+      var key = localStorage.key(i);
+      if(key.substring(0, 10) == dayString && key.substring(11) != "その他(Auto)")
+      {
         $("ul.panel li#tab0 div dl dd").append($('<br>')).append($('<input type="text">')
-          .attr("id", "task" + NumOfTimers).attr("value", this[1]).addClass("task"));
+          .attr("id", "task" + NumOfTimers).attr("value", key.substring(11)).addClass("task"));
         NumOfTimers++;
       }
-    });
-
+    }
+    if(NumOfTimers == 0)//日付が変わって最初の実行の場合、csvからロード
+    {
+      var csv = $.csv()(database);
+      $(csv).each(function(index){
+        if(index != 0 && this[1] != "その他(Auto)"){
+          $("ul.panel li#tab0 div dl dd").append($('<br>')).append($('<input type="text">')
+            .attr("id", "task" + NumOfTimers).attr("value", this[1]).addClass("task"));
+          NumOfTimers++;
+        }
+      });
+    }
     for(var i = 0; i < NumOfTimers + 1; i++){
       if(i == NumOfTimers)
       {
@@ -175,8 +197,9 @@ $(function(){
       }
       $("ul.panel li#tab0").append($('<input type="button">').attr("id","button" + i)
         .attr("value", timers[i].getTimerLabel()).addClass("timer").addClass("stop_state"));
-      timers[i].loadFromLocalStorage(getDayString());
+      timers[i].loadFromLocalStorage(dayString);
       timers[i].changeTimerState(0);
+      timers[i].saveToLocalStorage(dayString);
       timersManagementArray.push("");
     }
 
@@ -197,6 +220,17 @@ $(function(){
         changeState(NumOfTimers);
       }
     });
+
+    $("#csv table").append("<tbody>");
+    for(var i = 0; i < localStorage.length; i++){
+      var key = localStorage.key(i);
+      if(key.substring(0,10).match(/^\d{4}\/\d{2}\/\d{2}$/))
+      {
+        var value = localStorage.getItem(key);
+        $("#csv table").append("<tr><td>" + key.substring(0,10) + "</td><td>" + key.substring(11) + "</td><td>" + parseInt(value) + "</td></tr>");
+      }
+    }
+    $("#csv table").append("</tbody>");
   });
 
 	$("a.open").click(function(){
@@ -213,6 +247,8 @@ $(function(){
     for(var i = 0; i < NumOfTimers; i++){
       timers[i].setTimerLabel($("input#task" + i).attr("value"));
     }
+    $("#floatWindow").fadeOut("fast");
+    return false;
   });
 
   $("#floatWindow input#task_edit_cancel").click(function(){
