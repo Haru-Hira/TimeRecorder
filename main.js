@@ -1,7 +1,8 @@
 var timers = new Array();
+var timersManagementArray = new Array();
+var NumOfTimers = 0;
 
 $(function(){
-  var timersManagementArray = new Array();
   var savingTimer;
 
   var Timer = function(id, taskName){
@@ -15,6 +16,10 @@ $(function(){
     var hourStr = "00";
     var minStr = "00";
     var secStr = "00";
+
+    this.incrementId = function(){
+      id++;
+    }
 
     this.setTaskName = function(taskName){
       rawTaskName = taskName;
@@ -131,7 +136,7 @@ $(function(){
     }
 
     this.loadFromLocalStorage = function(dayString){
-      var savedTime = parseInt(localStorage.getItem(dayString + "_" + rawTaskName));
+      var savedTime = parseInt(localStorage.getItem(this.getLocalStorageKey(dayString)));
       if (isNaN(savedTime))
       {
         offsetTime = 0;
@@ -139,18 +144,30 @@ $(function(){
       {
         offsetTime = savedTime;
       }
-      //localStorage.clear();
       //console.log("Load : " + dayString + "_" + rawTaskName + localStorage.getItem(dayString + "_" + rawTaskName));
     }
 
     this.saveToLocalStorage = function(dayString){
-      localStorage.setItem(dayString + "_" + rawTaskName, offsetTime + recentTime - startTime);
+      localStorage.setItem(this.getLocalStorageKey(dayString), offsetTime + recentTime - startTime);
       //console.log("Save : " + dayString + "_" + rawTaskName + localStorage.getItem(dayString + "_" + rawTaskName));
     }
 
     this.removeFromLocalStorage = function(dayString){
-      localStorage.removeItem(dayString + "_" + rawTaskName);
+      localStorage.removeItem(this.getLocalStorageKey(dayString));
       //console.log("Remove : " + dayString + "_" + rawTaskName);
+    }
+
+    this.getLocalStorageKey = function(dayString){
+      var idString = "";
+      if(0 <= id && id <= 9)
+      {
+        idString += "0" + id;
+      }
+      else
+      {
+        idString += id;
+      }
+      return dayString + "_" + idString + "_" + rawTaskName;
     }
   }
 
@@ -163,15 +180,27 @@ $(function(){
 		return false;
 	});
 
-  var NumOfTimers = 0;
   $.get('./database.csv',function(database){
     var dayString = getDayString();
+    /*localStorage.clear(); //for Debug
+    localStorage.setItem("2013/01/03_00_タスク０", 40000);
+    localStorage.setItem("2013/01/03_01_タスク１", 40000);
+    localStorage.setItem("2013/01/03_02_その他(Auto)", 40000);*/
+    var keys = new Array();
     for(var i = 0; i < localStorage.length; i++){
       var key = localStorage.key(i);
-      if(key.substring(0, 10) == dayString && key.substring(11) != "その他(Auto)")
+      if(key.substring(0, 10) == dayString)
+      {
+        keys.push(key);
+      }
+    }
+    keys.sort();
+    for(var i = 0; i < keys.length; i++)
+    {
+      if(keys[i].substring(14) != "その他(Auto)")
       {
         $("ul.panel li#tab0 div dl dd").append($('<br>')).append($('<input type="text">')
-          .attr("id", "task" + NumOfTimers).attr("value", key.substring(11)).addClass("task"));
+          .attr("id", "task" + NumOfTimers).attr("value", keys[i].substring(14)).addClass("task"));
         NumOfTimers++;
       }
     }
@@ -179,9 +208,9 @@ $(function(){
     {
       var csv = $.csv()(database);
       $(csv).each(function(index){
-        if(index != 0 && this[1] != "その他(Auto)"){
+        if(index != 0 && this[2] != "その他(Auto)"){
           $("ul.panel li#tab0 div dl dd").append($('<br>')).append($('<input type="text">')
-            .attr("id", "task" + NumOfTimers).attr("value", this[1]).addClass("task"));
+            .attr("id", "task" + NumOfTimers).attr("value", this[2]).addClass("task"));
           NumOfTimers++;
         }
       });
@@ -189,7 +218,7 @@ $(function(){
     for(var i = 0; i < NumOfTimers + 1; i++){
       if(i == NumOfTimers)
       {
-        timers.push(new Timer(NumOfTimers, "その他(Auto)"));
+        timers.push(new Timer(i, "その他(Auto)"));
       }
       else
       {
@@ -203,7 +232,7 @@ $(function(){
       timersManagementArray.push("");
     }
 
-    $("input.timer").click(function(){
+    $("input.timer").live("click", function(){
       var button_id = parseInt($(this).attr("id").substring(6));
       if($(this).hasClass("stop_state"))
       {
@@ -222,13 +251,20 @@ $(function(){
     });
 
     $("#csv table").append("<tbody>");
+    var keys = new Array();
     for(var i = 0; i < localStorage.length; i++){
       var key = localStorage.key(i);
       if(key.substring(0,10).match(/^\d{4}\/\d{2}\/\d{2}$/))
       {
-        var value = localStorage.getItem(key);
-        $("#csv table").append("<tr><td>" + key.substring(0,10) + "</td><td>" + key.substring(11) + "</td><td>" + parseInt(value) + "</td></tr>");
+        keys.push(key);
       }
+    }
+    keys.sort();
+    for(var i = 0; i < keys.length; i++)
+    {
+      var value = localStorage.getItem(keys[i]);
+      $("#csv table").append("<tr><td>" + keys[i].substring(0,10) + "</td><td>" + keys[i].substring(11,13)
+        + "</td><td>" + keys[i].substring(14) + "</td><td>" + parseInt(value) + "</td></tr>");
     }
     $("#csv table").append("</tbody>");
   });
@@ -254,6 +290,32 @@ $(function(){
   $("#floatWindow input#task_edit_cancel").click(function(){
     $("#floatWindow").fadeOut("fast");
     return false;
+  });
+
+  $("#floatWindow input#task_edit_add").click(function(){
+    var other_running_flg = false;
+    $("ul.panel li#tab0 div dl dd").append($('<br>')).append($('<input type="text">')
+      .attr("id", "task" + NumOfTimers).attr("value", "新規タスク" + NumOfTimers).addClass("task"));
+    if($("input#button" + NumOfTimers).hasClass("running_state"))
+    {
+      other_running_flg = true;
+      changeState(NumOfTimers);
+    }
+    timers[NumOfTimers].removeFromLocalStorage(getDayString());
+    timersManagementArray.splice(NumOfTimers, 0, "");
+    timers.splice(NumOfTimers, 0, new Timer(NumOfTimers, $("input#task" + NumOfTimers).attr("value")));
+    $("ul.panel li#tab0 input#button" + NumOfTimers).attr("id", "button" + (NumOfTimers + 1));
+    $("ul.panel li#tab0 input#button" + (NumOfTimers - 1)).after($('<input type="button">').attr("id","button" + NumOfTimers)
+      .attr("value", timers[NumOfTimers].getTimerLabel()).addClass("timer").addClass("stop_state"));
+    timers[NumOfTimers + 1].incrementId();
+    timers[NumOfTimers + 1].saveToLocalStorage(getDayString());
+    timers[NumOfTimers].saveToLocalStorage(getDayString());
+    NumOfTimers++;
+    if(other_running_flg)
+    {
+      changeState(NumOfTimers);
+    }
+    //return false;
   });
 
 	$("#floatWindow dl dt").mousedown(function(e){
