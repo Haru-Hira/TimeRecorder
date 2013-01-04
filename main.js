@@ -372,6 +372,8 @@ function getDayString(){
 
 //DigitalTimer
 $(function(){
+  var s = 0.6; //タイマーのサイズ(基準サイズに対する係数)
+
   var _context;
   var _hour1;
   var _hour2;
@@ -381,32 +383,39 @@ $(function(){
   var _sec2;
 
   var HOUR_ONE = 0;
-  var HOUR_TWO = 50;
-  var MINUTE_ONE = 125;
-  var MINUTE_TWO = 175;
-  var SECOUND_ONE = 255;
-  var SECOUND_TWO = 305;
+  var HOUR_TWO = 50 * s;
+  var MINUTE_ONE = 125 * s;
+  var MINUTE_TWO = 175 * s;
+  var SECOUND_ONE = 255 * s;
+  var SECOUND_TWO = 305 * s;
+
+  var p10 = 10 * s;
+  var p40 = 40 * s;
+  var p70 = 70 * s;
+  var p5 = 5 * s;
+  var p25 = 25 * s;
+  var p30 = 30 * s;
 
   var DIGIT = {
-    0:[{'x':10,'y':10,'l':true},{'x':10,'y':40,'l':true},{'x':40,'y':10,'l':true},{'x':40,'y':40,'l':true},{'x':10,'y':10,'l':false},{'x':10,'y':70,'l':false}],
-    1:[{'x':40,'y':10,'l':true},{'x':40,'y':40,'l':true}],
-    2:[{'x':10,'y':40,'l':true},{'x':40,'y':10,'l':true},{'x':10,'y':10,'l':false},{'x':10,'y':40,'l':false},{'x':10,'y':70,'l':false}],
-    3:[{'x':40,'y':40,'l':true},{'x':40,'y':10,'l':true},{'x':10,'y':10,'l':false},{'x':10,'y':40,'l':false},{'x':10,'y':70,'l':false}],
-    4:[{'x':10,'y':10,'l':true},{'x':40,'y':10,'l':true},{'x':40,'y':40,'l':true},{'x':10,'y':40,'l':false}],
-    5:[{'x':10,'y':10,'l':true},{'x':40,'y':40,'l':true},{'x':10,'y':10,'l':false},{'x':10,'y':40,'l':false},{'x':10,'y':70,'l':false}],
-    6:[{'x':10,'y':10,'l':true},{'x':10,'y':40,'l':true},{'x':40,'y':40,'l':true},{'x':10,'y':10,'l':false},{'x':10,'y':40,'l':false},{'x':10,'y':70,'l':false}],
-    7:[{'x':40,'y':10,'l':true},{'x':40,'y':40,'l':true},{'x':10,'y':10,'l':false}],
-    8:[{'x':10,'y':10,'l':true},{'x':10,'y':40,'l':true},{'x':40,'y':10,'l':true},{'x':40,'y':40,'l':true},{'x':10,'y':10,'l':false},{'x':10,'y':40,'l':false},{'x':10,'y':70,'l':false}],
-    9:[{'x':10,'y':10,'l':true},{'x':40,'y':10,'l':true},{'x':40,'y':40,'l':true},{'x':10,'y':10,'l':false},{'x':10,'y':40,'l':false},{'x':10,'y':70,'l':false}],
-    'clear':{'x':5,'y':5,'w':40,'h':70}
+    0:[{'x':p10,'y':p10,'l':true},{'x':p10,'y':p40,'l':true},{'x':p40,'y':p10,'l':true},{'x':p40,'y':p40,'l':true},{'x':p10,'y':p10,'l':false},{'x':p10,'y':p70,'l':false}],
+    1:[{'x':p40,'y':p10,'l':true},{'x':p40,'y':p40,'l':true}],
+    2:[{'x':p10,'y':p40,'l':true},{'x':p40,'y':p10,'l':true},{'x':p10,'y':p10,'l':false},{'x':p10,'y':p40,'l':false},{'x':p10,'y':p70,'l':false}],
+    3:[{'x':p40,'y':p40,'l':true},{'x':p40,'y':p10,'l':true},{'x':p10,'y':p10,'l':false},{'x':p10,'y':p40,'l':false},{'x':p10,'y':p70,'l':false}],
+    4:[{'x':p10,'y':p10,'l':true},{'x':p40,'y':p10,'l':true},{'x':p40,'y':p40,'l':true},{'x':p10,'y':p40,'l':false}],
+    5:[{'x':p10,'y':p10,'l':true},{'x':p40,'y':p40,'l':true},{'x':p10,'y':p10,'l':false},{'x':p10,'y':p40,'l':false},{'x':p10,'y':p70,'l':false}],
+    6:[{'x':p10,'y':p10,'l':true},{'x':p10,'y':p40,'l':true},{'x':p40,'y':p40,'l':true},{'x':p10,'y':p10,'l':false},{'x':p10,'y':p40,'l':false},{'x':p10,'y':p70,'l':false}],
+    7:[{'x':p40,'y':p10,'l':true},{'x':p40,'y':p40,'l':true},{'x':p10,'y':p10,'l':false}],
+    8:[{'x':p10,'y':p10,'l':true},{'x':p10,'y':p40,'l':true},{'x':p40,'y':p10,'l':true},{'x':p40,'y':p40,'l':true},{'x':p10,'y':p10,'l':false},{'x':p10,'y':p40,'l':false},{'x':p10,'y':p70,'l':false}],
+    9:[{'x':p10,'y':p10,'l':true},{'x':p40,'y':p10,'l':true},{'x':p40,'y':p40,'l':true},{'x':p10,'y':p10,'l':false},{'x':p10,'y':p40,'l':false},{'x':p10,'y':p70,'l':false}],
+    'clear':{'x':p5,'y':p5,'w':p40,'h':p70}
   };
 
   function drawColon(x) {
     _context.beginPath();
-    _context.arc(x, 25, 5, 0, Math.PI*2, false);
+    _context.arc(x, 25 * s, 5 * s, 0, Math.PI*2, false);
     _context.fill();
     _context.beginPath();
-    _context.arc(x, 55, 5, 0, Math.PI*2, false);
+    _context.arc(x, 55 * s, 5 * s, 0, Math.PI*2, false);
     _context.fill();
   }
 
@@ -481,24 +490,24 @@ $(function(){
   function drawParts(x, y, l) {
     _context.moveTo(x, y);
     if (l) {
-      _context.lineTo(x + 5, y + 5);
-      _context.lineTo(x + 5, y + 25);
-      _context.lineTo(x, y + 30);
-      _context.lineTo(x - 5, y + 25);
-      _context.lineTo(x - 5, y + 5);
+      _context.lineTo(x + p5, y + p5);
+      _context.lineTo(x + p5, y + p25);
+      _context.lineTo(x, y + p30);
+      _context.lineTo(x - p5, y + p25);
+      _context.lineTo(x - p5, y + p5);
     } else {
-      _context.lineTo(x + 5, y - 5);
-      _context.lineTo(x + 25, y - 5);
-      _context.lineTo(x + 30, y);
-      _context.lineTo(x + 25, y + 5);
-      _context.lineTo(x + 5, y + 5);
+      _context.lineTo(x + p5, y - p5);
+      _context.lineTo(x + p25, y - p5);
+      _context.lineTo(x + p30, y);
+      _context.lineTo(x + p25, y + p5);
+      _context.lineTo(x + p5, y + p5);
     }
     _context.closePath();
   }
   _context = document.getElementById('canvas').getContext('2d');
 
-  drawColon(115);
-  drawColon(240);
+  drawColon(115 * s);
+  drawColon(240 * s);
 
   interval();
 
