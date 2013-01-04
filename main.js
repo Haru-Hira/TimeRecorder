@@ -39,7 +39,7 @@ $(function(){
           break;
         }
         if (escaped_str.charAt(i) == "%") {
-          if (escaped_str.charAt(i+1) == "u") {
+          if (escaped_str.charAt(i + 1) == "u") {
             i += 5;
             half_count += 2;
           }else{
@@ -64,7 +64,7 @@ $(function(){
     this.setTimerLabel = function(Name){
       if(rawTaskName != Name)
       {
-        var dayString = getDayString();
+        var dayString = localStorage.getItem("latest_running_day");
         this.removeFromLocalStorage(dayString);
         taskName = this.setTaskName(Name);
         $("ul.panel li#tab0 input#button" + id).attr("value", this.getTimerLabel());
@@ -135,26 +135,24 @@ $(function(){
       }
     }
 
-    this.loadFromLocalStorage = function(dayString){
-      var savedTime = parseInt(localStorage.getItem(this.getLocalStorageKey(dayString)));
+    this.loadFromLocalStorage = function(){
+      var savedTime = parseInt(localStorage.getItem(this.getLocalStorageKey(localStorage.getItem("latest_running_day"))));
       if (isNaN(savedTime))
       {
         offsetTime = 0;
-      }else
+      }
+      else
       {
         offsetTime = savedTime;
       }
-      //console.log("Load : " + dayString + "_" + rawTaskName + localStorage.getItem(dayString + "_" + rawTaskName));
     }
 
-    this.saveToLocalStorage = function(dayString){
-      localStorage.setItem(this.getLocalStorageKey(dayString), offsetTime + recentTime - startTime);
-      //console.log("Save : " + dayString + "_" + rawTaskName + localStorage.getItem(dayString + "_" + rawTaskName));
+    this.saveToLocalStorage = function(){
+      localStorage.setItem(this.getLocalStorageKey(localStorage.getItem("latest_running_day")), offsetTime + recentTime - startTime);
     }
 
-    this.removeFromLocalStorage = function(dayString){
-      localStorage.removeItem(this.getLocalStorageKey(dayString));
-      //console.log("Remove : " + dayString + "_" + rawTaskName);
+    this.removeFromLocalStorage = function(){
+      localStorage.removeItem(this.getLocalStorageKey(localStorage.getItem("latest_running_day")));
     }
 
     this.getLocalStorageKey = function(dayString){
@@ -180,12 +178,13 @@ $(function(){
 		return false;
 	});
 
-  $.get('./database.csv',function(database){
-    var dayString = getDayString();
+  //$.get('./database.csv',function(database){
     /*localStorage.clear(); //for Debug
+    localStorage.setItem("latest_running_day", "2013/01/03");
     localStorage.setItem("2013/01/03_00_タスク０", 40000);
     localStorage.setItem("2013/01/03_01_タスク１", 40000);
     localStorage.setItem("2013/01/03_02_その他(Auto)", 40000);*/
+    var dayString = localStorage.getItem("latest_running_day");
     var keys = new Array();
     for(var i = 0; i < localStorage.length; i++){
       var key = localStorage.key(i);
@@ -204,7 +203,7 @@ $(function(){
         NumOfTimers++;
       }
     }
-    if(NumOfTimers == 0)//日付が変わって最初の実行の場合、csvからロード
+    /*if(NumOfTimers == 0)//日付が変わって最初の実行かつ、タイマーがすべて停止中の場合、csvからロード
     {
       var csv = $.csv()(database);
       $(csv).each(function(index){
@@ -214,7 +213,7 @@ $(function(){
           NumOfTimers++;
         }
       });
-    }
+    }*/
     for(var i = 0; i < NumOfTimers + 1; i++){
       if(i == NumOfTimers)
       {
@@ -226,6 +225,10 @@ $(function(){
       }
       $("ul.panel li#tab0").append($('<input type="button">').attr("id","button" + i)
         .attr("value", timers[i].getTimerLabel()).addClass("timer").addClass("stop_state"));
+      if(localStorage.getItem("latest_running_day") != getDayString())
+      {
+        localStorage.setItem("latest_running_day", getDayString());
+      }
       timers[i].loadFromLocalStorage(dayString);
       timers[i].changeTimerState(0);
       timers[i].saveToLocalStorage(dayString);
@@ -267,11 +270,10 @@ $(function(){
         + "</td><td>" + keys[i].substring(14) + "</td><td>" + parseInt(value) + "</td></tr>");
     }
     $("#csv table").append("</tbody>");
-  });
+  //});
 
-	$("a.open").click(function(){
+  $("input.open").click(function(){
 		$("#floatWindow").fadeIn("fast");
-		return false;
 	});
 
 	$("#floatWindow a.close").click(function(){
@@ -284,12 +286,10 @@ $(function(){
       timers[i].setTimerLabel($("input#task" + i).attr("value"));
     }
     $("#floatWindow").fadeOut("fast");
-    return false;
   });
 
   $("#floatWindow input#task_edit_cancel").click(function(){
     $("#floatWindow").fadeOut("fast");
-    return false;
   });
 
   $("#floatWindow input#task_edit_add").click(function(){
@@ -301,21 +301,20 @@ $(function(){
       other_running_flg = true;
       changeState(NumOfTimers);
     }
-    timers[NumOfTimers].removeFromLocalStorage(getDayString());
+    timers[NumOfTimers].removeFromLocalStorage();
     timersManagementArray.splice(NumOfTimers, 0, "");
     timers.splice(NumOfTimers, 0, new Timer(NumOfTimers, $("input#task" + NumOfTimers).attr("value")));
     $("ul.panel li#tab0 input#button" + NumOfTimers).attr("id", "button" + (NumOfTimers + 1));
     $("ul.panel li#tab0 input#button" + (NumOfTimers - 1)).after($('<input type="button">').attr("id","button" + NumOfTimers)
       .attr("value", timers[NumOfTimers].getTimerLabel()).addClass("timer").addClass("stop_state"));
     timers[NumOfTimers + 1].incrementId();
-    timers[NumOfTimers + 1].saveToLocalStorage(getDayString());
-    timers[NumOfTimers].saveToLocalStorage(getDayString());
+    timers[NumOfTimers + 1].saveToLocalStorage();
+    timers[NumOfTimers].saveToLocalStorage();
     NumOfTimers++;
     if(other_running_flg)
     {
       changeState(NumOfTimers);
     }
-    //return false;
   });
 
 	$("#floatWindow dl dt").mousedown(function(e){
@@ -339,7 +338,7 @@ $(function(){
     {
       input_button.removeClass("stop_state").addClass("running_state");
       timersManagementArray[button_id] = setInterval("timers[" + button_id + "].changeTimerState(1)", 100);
-      savingTimer = setInterval("timers[" + button_id + "].saveToLocalStorage(getDayString())", 500);
+      savingTimer = setInterval("timers[" + button_id + "].saveToLocalStorage()", 500);
     }
     else if(input_button.hasClass("running_state"))
     {

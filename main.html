@@ -20,13 +20,14 @@
             </ul>
             <ul class="panel">
                 <li id="tab0">
-                	工事中・・・<br>
-                	<a href="#floatWindow" class="open">項目の設定</a>
+                    <h4>※日付が変わってもリロードするまで同じ日付として工数を記録します。</h4>
+                    <h4>※日付が変わって最初のリロードで工数を記録する日付を変更します。</h4><br>
+                    <input type="button" class="open" id="task_edit_open" value="タスク設定">
 					<div id="floatWindow">
 						<a href="./main.html" class="close"><img src="./images/close.png" alt="閉じる" /></a>
 						<dl>
-							<dt>項目設定</dt>
-							<dd>このウィンドウでタスクなどの設定や環境設定を行う。
+							<dt>タスク設定</dt>
+							<dd>
                                 <input type="button" class="ok_button" id="task_edit_ok" value="OK">
                                 <input type="button" class="cancel_button" id="task_edit_cancel" value="キャンセル">
                                 <input type="button" class="add_task_button" id="task_edit_add" value="タスク追加">
