@@ -21,6 +21,10 @@ $(function(){
       id++;
     }
 
+    this.decrementId = function(){
+      id--;
+    }
+
     this.setTaskName = function(taskName){
       rawTaskName = taskName;
       var escaped_str = escape(taskName);
@@ -199,7 +203,8 @@ $(function(){
       if(keys[i].substring(14) != "その他(Auto)")
       {
         $("ul.panel li#tab0 div dl dd").append($('<br>')).append($('<input type="text">')
-          .attr("id", "task" + NumOfTimers).attr("value", keys[i].substring(14)).addClass("task"));
+          .attr("id", "task" + NumOfTimers).attr("value", keys[i].substring(14)).addClass("task"))
+        .append($('<input type="button">').attr("id", "task_edit_delete" + NumOfTimers).attr("value", "delete").addClass("delete_button"));
         NumOfTimers++;
       }
     }
@@ -295,7 +300,8 @@ $(function(){
   $("#floatWindow input#task_edit_add").click(function(){
     var other_running_flg = false;
     $("ul.panel li#tab0 div dl dd").append($('<br>')).append($('<input type="text">')
-      .attr("id", "task" + NumOfTimers).attr("value", "新規タスク" + NumOfTimers).addClass("task"));
+      .attr("id", "task" + NumOfTimers).attr("value", "新規タスク" + NumOfTimers).addClass("task"))
+    .append($('<input type="button">').attr("id", "task_edit_delete" + NumOfTimers).attr("value", "delete").addClass("delete_button"));
     if($("input#button" + NumOfTimers).hasClass("running_state"))
     {
       other_running_flg = true;
@@ -314,6 +320,56 @@ $(function(){
     if(other_running_flg)
     {
       changeState(NumOfTimers);
+    }
+  });
+
+  $("#floatWindow input.delete_button").live("click", function(){
+    var running_flg = false;
+    var delete_running_timer_flg = false;
+    var delete_timer_id = parseInt($(this).attr("id").substring(16));
+    var running_timer_id = -1;
+    if($("input.running_state").length == 1)
+    {
+      running_flg = true;
+      running_timer_id = parseInt($("input.running_state").attr("id").substring(6));
+      if(delete_timer_id == running_timer_id)
+      {
+        delete_running_timer_flg = true;
+      }
+      changeState(running_timer_id);
+      if(delete_timer_id < running_timer_id)
+      {
+        running_timer_id--;
+      }
+    }
+    $("input#task" + delete_timer_id).prev().remove();
+    $("input#task" + delete_timer_id).remove();
+    $("input#task_edit_delete" + delete_timer_id).remove();
+    $("input#button" + delete_timer_id).remove();
+    timers[delete_timer_id].removeFromLocalStorage();
+    for(var i = delete_timer_id; i < NumOfTimers; i++)
+    {
+      var j = i + 1;
+      timers[j].removeFromLocalStorage();
+      timers[j].decrementId();
+      timers[j].saveToLocalStorage();
+      $("input#task" + j).attr("id", "task" + i);
+      $("input#task_edit_delete" + j).attr("id", "task_edit_delete" + i);
+      $("input#button" + j).attr("id", "button" + i);
+    }
+    timersManagementArray.splice(delete_timer_id, 1);
+    timers.splice(delete_timer_id, 1);
+    NumOfTimers--;
+    if(running_flg)
+    {
+      if(delete_running_timer_flg)
+      {
+        changeState(NumOfTimers);
+      }
+      else
+      {
+        changeState(running_timer_id);
+      }
     }
   });
 
