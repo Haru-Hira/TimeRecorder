@@ -25,6 +25,10 @@ $(function(){
       id--;
     }
 
+    this.changeOffsetTime = function(time){
+      offsetTime = time;
+    }
+
     this.setTaskName = function(taskName){
       rawTaskName = taskName;
       var escaped_str = escape(taskName);
@@ -86,7 +90,11 @@ $(function(){
       {
         label += "【工数計測中】\n";
       }
-      return label + taskName + "\n" + hourStr + ":" + minStr + ":" + secStr;
+      return label + taskName + "\n" + this.getTimeString();
+    }
+
+    this.getTimeString = function(){
+      return hourStr + ":" + minStr + ":" + secStr;
     }
 
     this.changeTimerState = function(flg){
@@ -202,9 +210,11 @@ $(function(){
     {
       if(keys[i].substring(14) != "その他(Auto)")
       {
-        $("ul.panel li#tab0 div dl dd").append($('<br>')).append($('<input type="text">')
-          .attr("id", "task" + NumOfTimers).attr("value", keys[i].substring(14)).addClass("task"))
-        .append($('<input type="button">').attr("id", "task_edit_delete" + NumOfTimers).attr("value", "delete").addClass("delete_button"));
+        $("ul.panel li#tab0 div dl dd")
+        .append($('<br>'))
+        .append($('<input type="button">').attr("id", "task_edit_delete" + NumOfTimers).addClass("delete_button"))
+        .append($('<input type="text">').attr("id", "task" + NumOfTimers).attr("value", keys[i].substring(14)).addClass("task"))
+        .append($('<input type="text">').attr("id", "task_time" + NumOfTimers).attr("value", getTimeString(parseInt(localStorage.getItem(keys[i])))).addClass("time"));
         NumOfTimers++;
       }
     }
@@ -272,12 +282,16 @@ $(function(){
     {
       var value = localStorage.getItem(keys[i]);
       $("#csv table").append("<tr><td>" + keys[i].substring(0,10) + "</td><td>" + keys[i].substring(11,13)
-        + "</td><td>" + keys[i].substring(14) + "</td><td>" + parseInt(value) + "</td></tr>");
+        + "</td><td>" + keys[i].substring(14) + "</td><td>" + getTimeString(value) + "</td></tr>");
     }
     $("#csv table").append("</tbody>");
   //});
 
   $("input.open").click(function(){
+    $("input.time").each(function(){
+      var id = parseInt($(this).attr("id").substring(9));
+      $(this).attr("value", timers[id].getTimeString());
+    });
 		$("#floatWindow").fadeIn("fast");
 	});
 
@@ -288,7 +302,15 @@ $(function(){
 
   $("#floatWindow input#task_edit_ok").click(function(){
     for(var i = 0; i < NumOfTimers; i++){
-      timers[i].setTimerLabel($("input#task" + i).attr("value"));
+      if(timers[i].rawTaskName != $("input#task" + i).attr("value"))
+      {
+        timers[i].setTimerLabel($("input#task" + i).attr("value"));
+      }
+      if(timers[i].getTimeString() != $("input#task_time" + i).attr("value"))
+      {
+        timers[i].changeTimerState(0);
+        timers[i].changeOffsetTime(getTimeNumber($("input#task_time" + i).attr("value")));
+      }
     }
     $("#floatWindow").fadeOut("fast");
   });
@@ -299,9 +321,11 @@ $(function(){
 
   $("#floatWindow input#task_edit_add").click(function(){
     var other_running_flg = false;
-    $("ul.panel li#tab0 div dl dd").append($('<br>')).append($('<input type="text">')
-      .attr("id", "task" + NumOfTimers).attr("value", "新規タスク" + NumOfTimers).addClass("task"))
-    .append($('<input type="button">').attr("id", "task_edit_delete" + NumOfTimers).attr("value", "delete").addClass("delete_button"));
+    $("ul.panel li#tab0 div dl dd")
+      .append($('<br>'))
+      .append($('<input type="button">').attr("id", "task_edit_delete" + NumOfTimers).addClass("delete_button"))
+      .append($('<input type="text">').attr("id", "task" + NumOfTimers).attr("value", "新規タスク" + NumOfTimers).addClass("task"))
+      .append($('<input type="text">').attr("id", "task_time" + NumOfTimers).attr("value", getTimeString(0)).addClass("time"));
     if($("input#button" + NumOfTimers).hasClass("running_state"))
     {
       other_running_flg = true;
@@ -342,9 +366,10 @@ $(function(){
         running_timer_id--;
       }
     }
-    $("input#task" + delete_timer_id).prev().remove();
-    $("input#task" + delete_timer_id).remove();
+    $("input#task_edit_delete" + delete_timer_id).prev().remove();
     $("input#task_edit_delete" + delete_timer_id).remove();
+    $("input#task" + delete_timer_id).remove();
+    $("input#task_time" + delete_timer_id).remove();
     $("input#button" + delete_timer_id).remove();
     timers[delete_timer_id].removeFromLocalStorage();
     for(var i = delete_timer_id; i < NumOfTimers; i++)
@@ -353,8 +378,9 @@ $(function(){
       timers[j].removeFromLocalStorage();
       timers[j].decrementId();
       timers[j].saveToLocalStorage();
-      $("input#task" + j).attr("id", "task" + i);
       $("input#task_edit_delete" + j).attr("id", "task_edit_delete" + i);
+      $("input#task" + j).attr("id", "task" + i);
+      $("input#task_time" + j).attr("id", "task_time" + i);
       $("input#button" + j).attr("id", "button" + i);
     }
     timersManagementArray.splice(delete_timer_id, 1);
@@ -424,6 +450,51 @@ function getDayString(){
     day = "0" + day;
   }
   return "" + year + "/" + month + "/" + day;
+}
+
+function getTimeString(time){
+  if(isNaN(time))
+  {
+    return "00:00:00"
+  }
+  var datet = parseInt(parseInt(time) / 1000);
+  var hour = parseInt(datet / 3600);
+  var min = parseInt((datet / 60) % 60);
+  var sec = datet % 60;
+
+  var hourStr = "";
+  var minStr = "";
+  var secStr = "";
+
+  if (hour < 10) {
+    hourStr += "0" + hour;
+  } else {
+    hourStr += hour;
+  }
+  if (min < 10) {
+    minStr += "0" + min;
+  } else {
+    minStr += min;
+  }
+  if (sec < 10) {
+    secStr += "0" + sec;
+  } else {
+    secStr += sec;
+  }
+  return "" + hourStr + ":" + minStr + ":" + secStr;
+}
+
+function getTimeNumber(timeStr)
+{
+  if(timeStr.match(/^\d{2,}\:\d{2}\:\d{2}$/))
+  {
+    var reg = timeStr.match(/\d{2,}/g);
+    return (parseInt(reg[0]) * 3600 + parseInt(reg[1]) * 60 + parseInt(reg[2])) * 1000;
+  }
+  else
+  {
+    return 0;
+  }
 }
 
 //DigitalTimer

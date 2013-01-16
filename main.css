@@ -121,10 +121,30 @@ ul.panel li input:hover{
 	margin: 10px;
 }
 
-#floatWindow dl dd input[type="text"]{
-	width: 600px;
+#floatWindow dl dd input.delete_button{
+	background-image:url("./images/task_delete.png");
+	-moz-background-size:100% 100%;
+	background-size:100% 100%;
+	width: 30px;
+	height: 30px;
+	font-size: 18px;
+	margin: 10px;
+	border: 0px;
+}
+
+#floatWindow dl dd input.task{
+	width: 400px;
 	height: 30px;
 	font-size: 20px;
+	margin: 10px;
+}
+
+#floatWindow dl dd input.time{
+	text-align:right;
+	width: 90px;
+	height: 30px;
+	font-size: 20px;
+	margin: 10px;
 }
 
 canvas { background-color: #DDDDDD; font: 30px sans-serif; }
