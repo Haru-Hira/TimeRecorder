@@ -37,35 +37,107 @@
                     現在の時刻 ： <canvas id="canvas" height="48" width="215"></canvas><br>
                 </li>
                 <li id="tab1">
-                	<p>表示日：
-                		<select name="date">
-                			<option value="12_15">12月15日</option>
-                			<option value="12_16">12月16日</option>
-                			<option value="12_17">12月17日</option>
-                			<option value="12_18">12月18日</option>
-                			<option value="12_19">12月19日</option>
-                			<option value="12_20">12月20日</option>
-                			<option value="12_21">12月21日</option>
-                		</select>
-                	</p><br>
-                	<p>工事中・・・</p>
+                	<form action="" method="post" name="form1" id="form1">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th>表示日：</th>
+                                    <td>
+                                        <select id="year">
+                                            <option value="2013">2013</option>
+                                            <option value="2014">2014</option>
+                                            <option value="2015">2015</option>
+                                            <option value="2016">2016</option>
+                                        </select>年
+                                        <select id="month">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                        </select>月
+                                        <select id="days">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                            <option value="13">13</option>
+                                            <option value="14">14</option>
+                                            <option value="15">15</option>
+                                            <option value="16">16</option>
+                                            <option value="17">17</option>
+                                            <option value="18">18</option>
+                                            <option value="19">19</option>
+                                            <option value="20">20</option>
+                                            <option value="21">21</option>
+                                            <option value="22">22</option>
+                                            <option value="23">23</option>
+                                            <option value="24">24</option>
+                                            <option value="25">25</option>
+                                            <option value="26">26</option>
+                                            <option value="27">27</option>
+                                            <option value="28">28</option>
+                                            <option value="29">29</option>
+                                            <option value="30">30</option>
+                                            <option value="31">31</option>
+                                        </select>日
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <br>
                     <div id="csv"><table border=1></table></div>
                 </li>
                 <li id="tab2">
-                	<p>表示月度：
-                		<select name="month">
-                			<option value="4">4月</option>
-                			<option value="5">5月</option>
-                			<option value="6">6月</option>
-                			<option value="7">7月</option>
-                			<option value="8">8月</option>
-                			<option value="9">9月</option>
-                			<option value="10">10月</option>
-                			<option value="11">11月</option>
-                			<option value="12">12月</option>
-                		</select>
-                	</p><br>
-                	<p>工事中・・・</p>
+                    <form action="" method="post" name="form2" id="form2">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th>表示月度：</th>
+                                    <td>
+                                        <select id="year">
+                                            <option value="2013">2013</option>
+                                            <option value="2014">2014</option>
+                                            <option value="2015">2015</option>
+                                            <option value="2016">2016</option>
+                                        </select>年
+                                        <select id="month">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                            <option value="11">11</option>
+                                            <option value="12">12</option>
+                                        </select>月
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <br>
+                    <div id="csv2"><table border=1></table></div>
                 </li>
             </ul>
         </div>

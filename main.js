@@ -414,6 +414,32 @@ $(function(){
 		$(document).unbind("mousemove");
 	});
 
+  $("#form1 #year, #form1 #month").change(function() {
+  // フォームと各年月日のname属性を指定
+    var formN = document.form1;
+    var tYear = formN.year;
+    var tMonth  = formN.month;
+    var tDays = formN.days;
+
+    var selectY = tYear.options[tYear.selectedIndex].value;
+    var selectM = tMonth.options[tMonth.selectedIndex].value;
+    var selectD = tDays.options[tDays.selectedIndex].value;
+
+    var dateObj = new Date(selectY, selectM, 0);
+
+    tDays.length = 0;
+    for (var i = 1;i <= dateObj.getDate();i++) {
+      tDays.options[i] = new Option(i, i);
+    }
+
+    tDays.removeChild(tDays.options[0]);
+    if (selectD > tDays.length) {
+      tDays.options[tDays.length - 1].selected = true;
+    } else {
+      tDays.options[selectD - 1].selected = true;
+    }
+  });
+
   var changeState = function(button_id){
     var input_button = $("#button" + button_id);
     if(input_button.hasClass("stop_state"))
@@ -639,4 +665,5 @@ $(function(){
   interval();
 
   setInterval(interval, 1000);
+
 });
