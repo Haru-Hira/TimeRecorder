@@ -240,9 +240,9 @@ $(function(){
       }
       $("ul.panel li#tab0").append($('<input type="button">').attr("id","button" + i)
         .attr("value", timers[i].getTimerLabel()).addClass("timer").addClass("stop_state"));
-      if(localStorage.getItem("latest_running_day") != getDayString())
+      if(localStorage.getItem("latest_running_day") != getTodayString())
       {
-        localStorage.setItem("latest_running_day", getDayString());
+        localStorage.setItem("latest_running_day", getTodayString());
       }
       timers[i].loadFromLocalStorage(dayString);
       timers[i].changeTimerState(0);
@@ -414,7 +414,7 @@ $(function(){
 		$(document).unbind("mousemove");
 	});
 
-  $("#form1 #year, #form1 #month").change(function() {
+  $("#form1 #year, #form1 #month, #form1 #days").change(function() {
   // フォームと各年月日のname属性を指定
     var formN = document.form1;
     var tYear = formN.year;
@@ -435,8 +435,29 @@ $(function(){
     tDays.removeChild(tDays.options[0]);
     if (selectD > tDays.length) {
       tDays.options[tDays.length - 1].selected = true;
+      selectD = tDays.length;
     } else {
       tDays.options[selectD - 1].selected = true;
+    }
+
+    $("#csv table tbody").empty();
+    var keys = new Array();
+    for(var i = 0; i < localStorage.length; i++){
+      var key = localStorage.key(i);
+      if(key.substring(0,10).match(/^\d{4}\/\d{2}\/\d{2}$/))
+      {
+        keys.push(key);
+      }
+    }
+    keys.sort();
+    for(var i = 0; i < keys.length; i++)
+    {
+      if(keys[i].substring(0,10) == getDayString(selectY, selectM, selectD))
+      {
+        var value = localStorage.getItem(keys[i]);
+        $("#csv table tbody").append("<tr><td>" + keys[i].substring(0,10) + "</td><td>" + keys[i].substring(11,13)
+          + "</td><td>" + keys[i].substring(14) + "</td><td>" + getTimeString(value) + "</td></tr>");
+      }
     }
   });
 
@@ -458,11 +479,7 @@ $(function(){
   }
 });
 
-function getDayString(){
-  var date = new Date();
-  var year = date.getYear();
-  var month = date.getMonth() + 1;
-  var day = date.getDate();
+function getDayString(year, month, day){
   if (year < 2000)
   {
     year += 1900;
@@ -476,6 +493,14 @@ function getDayString(){
     day = "0" + day;
   }
   return "" + year + "/" + month + "/" + day;
+}
+
+function getTodayString(){
+  var date = new Date();
+  var year = date.getYear();
+  var month = date.getMonth() + 1;
+  var day = date.getDate();
+  return getDayString(year, month, day);
 }
 
 function getTimeString(time){
