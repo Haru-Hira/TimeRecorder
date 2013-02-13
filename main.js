@@ -267,24 +267,6 @@ $(function(){
         changeState(NumOfTimers);
       }
     });
-
-    $("#csv table").append("<tbody>");
-    var keys = new Array();
-    for(var i = 0; i < localStorage.length; i++){
-      var key = localStorage.key(i);
-      if(key.substring(0,10).match(/^\d{4}\/\d{2}\/\d{2}$/))
-      {
-        keys.push(key);
-      }
-    }
-    keys.sort();
-    for(var i = 0; i < keys.length; i++)
-    {
-      var value = localStorage.getItem(keys[i]);
-      $("#csv table").append("<tr><td>" + keys[i].substring(0,10) + "</td><td>" + keys[i].substring(11,13)
-        + "</td><td>" + keys[i].substring(14) + "</td><td>" + getTimeString(value) + "</td></tr>");
-    }
-    $("#csv table").append("</tbody>");
   //});
 
   $("input.open").click(function(){
@@ -450,14 +432,60 @@ $(function(){
       }
     }
     keys.sort();
+    var no_data_flag = true;
     for(var i = 0; i < keys.length; i++)
     {
       if(keys[i].substring(0,10) == getDayString(selectY, selectM, selectD))
       {
+        no_data_flag = false;
         var value = localStorage.getItem(keys[i]);
         $("#csv table tbody").append("<tr><td>" + keys[i].substring(0,10) + "</td><td>" + keys[i].substring(11,13)
           + "</td><td>" + keys[i].substring(14) + "</td><td>" + getTimeString(value) + "</td></tr>");
       }
+    }
+    if(no_data_flag)
+    {
+      $("#csv table tbody").append("<tr><td>該当日のデータはありません</td></tr>");
+    }
+  });
+
+  $("#form2 #year, #form2 #month").change(function() {
+    // フォームと各年月日のname属性を指定
+    var formN = document.form2;
+    var tYear = formN.year;
+    var tMonth  = formN.month;
+
+    var selectY = tYear.options[tYear.selectedIndex].value;
+    var selectM = tMonth.options[tMonth.selectedIndex].value;
+
+    $("#csv2 table tbody").empty();
+    var keys = new Array();
+    for(var i = 0; i < localStorage.length; i++){
+      var key = localStorage.key(i);
+      if(key.substring(0,10).match(/^\d{4}\/\d{2}\/\d{2}$/))
+      {
+        if(parseInt(key.substring(0,4)) == parseInt(selectY) && parseInt(key.substring(5,7)) == parseInt(selectM))
+        {
+          if(key.substring(14) in keys)
+          {
+            keys[key.substring(14)] = keys[key.substring(14)] + parseInt(localStorage.getItem(key));
+          }
+          else
+          {
+            keys[key.substring(14)] = parseInt(localStorage.getItem(key));
+          }
+        }
+      }
+    }
+    var no_data_flag = true;
+    for(var i in keys)
+    {
+      no_data_flag = false;
+      $("#csv2 table tbody").append("<tr><td>" + i + "</td><td>" + getTimeString(keys[i]) + "</td></tr>");
+    }
+    if(no_data_flag)
+    {
+      $("#csv2 table tbody").append("<tr><td>該当月のデータはありません</td></tr>");
     }
   });
 
