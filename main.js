@@ -27,6 +27,7 @@ $(function(){
 
     this.changeOffsetTime = function(time){
       offsetTime = time;
+      startTime = recentTime;
     }
 
     this.setTaskName = function(taskName){
@@ -282,7 +283,7 @@ $(function(){
 		return false;
 	});
 
-  $("#floatWindow input#task_edit_ok").click(function(){
+  $("#task_edit_ok").click(function(){
     for(var i = 0; i < NumOfTimers; i++){
       if(timers[i].rawTaskName != $("input#task" + i).attr("value"))
       {
@@ -290,18 +291,21 @@ $(function(){
       }
       if(timers[i].getTimeString() != $("input#task_time" + i).attr("value"))
       {
-        timers[i].changeTimerState(0);
         timers[i].changeOffsetTime(getTimeNumber($("input#task_time" + i).attr("value")));
+        timers[i].changeTimerState(0);
+        $("#button" + i).attr("value", timers[i].getTimerLabel());
+        timers[i].saveToLocalStorage();
+        //timers[i].changeTimerState(0);
       }
     }
     $("#floatWindow").fadeOut("fast");
   });
 
-  $("#floatWindow input#task_edit_cancel").click(function(){
+  $("#task_edit_cancel").click(function(){
     $("#floatWindow").fadeOut("fast");
   });
 
-  $("#floatWindow input#task_edit_add").click(function(){
+  $("#task_edit_add").click(function(){
     var other_running_flg = false;
     $("ul.panel li#tab0 div dl dd")
       .append($('<br>'))
@@ -396,8 +400,23 @@ $(function(){
 		$(document).unbind("mousemove");
 	});
 
-  $("#form1 #year, #form1 #month, #form1 #days").change(function() {
-  // フォームと各年月日のname属性を指定
+  $("#form1 #year, #form1 #month, #form1 #days").ready(function(){
+    showDailyReport();
+  });
+
+  $("#form1 #year, #form1 #month, #form1 #days").change(function(){
+    showDailyReport();
+  });
+
+  $("#form2 #year, #form2 #month").ready(function(){
+    showMonthlyReport();
+  });
+
+    $("#form2 #year, #form2 #month").change(function(){
+    showMonthlyReport();
+  });
+
+  var showDailyReport = function() {
     var formN = document.form1;
     var tYear = formN.year;
     var tMonth  = formN.month;
@@ -422,7 +441,7 @@ $(function(){
       tDays.options[selectD - 1].selected = true;
     }
 
-    $("#csv table tbody").empty();
+    $("#csv table").empty();
     var keys = new Array();
     for(var i = 0; i < localStorage.length; i++){
       var key = localStorage.key(i);
@@ -439,18 +458,17 @@ $(function(){
       {
         no_data_flag = false;
         var value = localStorage.getItem(keys[i]);
-        $("#csv table tbody").append("<tr><td>" + keys[i].substring(0,10) + "</td><td>" + keys[i].substring(11,13)
-          + "</td><td>" + keys[i].substring(14) + "</td><td>" + getTimeString(value) + "</td></tr>");
+        $("#csv table").append("<tbody><tr><td>" + keys[i].substring(0,10) + "</td><td>" + keys[i].substring(11,13)
+          + "</td><td>" + keys[i].substring(14) + "</td><td>" + getTimeString(value) + "</td></tr></tbody>");
       }
     }
     if(no_data_flag)
     {
-      $("#csv table tbody").append("<tr><td>該当日のデータはありません</td></tr>");
+      $("#csv table").append("<tbody><tr><td>該当日のデータはありません</td></tr></tbody>");
     }
-  });
+  }
 
-  $("#form2 #year, #form2 #month").change(function() {
-    // フォームと各年月日のname属性を指定
+  var showMonthlyReport = function() {
     var formN = document.form2;
     var tYear = formN.year;
     var tMonth  = formN.month;
@@ -458,7 +476,7 @@ $(function(){
     var selectY = tYear.options[tYear.selectedIndex].value;
     var selectM = tMonth.options[tMonth.selectedIndex].value;
 
-    $("#csv2 table tbody").empty();
+    $("#csv2 table").empty();
     var keys = new Array();
     for(var i = 0; i < localStorage.length; i++){
       var key = localStorage.key(i);
@@ -481,13 +499,13 @@ $(function(){
     for(var i in keys)
     {
       no_data_flag = false;
-      $("#csv2 table tbody").append("<tr><td>" + i + "</td><td>" + getTimeString(keys[i]) + "</td></tr>");
+      $("#csv2 table").append("<tbody><tr><td>" + i + "</td><td>" + getTimeString(keys[i]) + "</td></tr></tbody>");
     }
     if(no_data_flag)
     {
-      $("#csv2 table tbody").append("<tr><td>該当月のデータはありません</td></tr>");
+      $("#csv2 table").append("<tbody><tr><td>該当月のデータはありません</td></tr></tbody>");
     }
-  });
+  }
 
   var changeState = function(button_id){
     var input_button = $("#button" + button_id);
@@ -572,7 +590,7 @@ function getTimeNumber(timeStr)
   }
   else
   {
-    return 0;
+    return 0;//ToDo: 入力数値の誤りを伝えるべきか？
   }
 }
 
