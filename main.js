@@ -191,84 +191,67 @@ $(function(){
 		return false;
 	});
 
-  //$.get('./database.csv',function(database){
-    /*localStorage.clear(); //for Debug
-    localStorage.setItem("latest_running_day", "2013/01/03");
-    localStorage.setItem("2013/01/03_00_タスク０", 40000);
-    localStorage.setItem("2013/01/03_01_タスク１", 40000);
-    localStorage.setItem("2013/01/03_02_その他(Auto)", 40000);*/
-    var dayString = localStorage.getItem("latest_running_day");
-    var keys = new Array();
-    for(var i = 0; i < localStorage.length; i++){
-      var key = localStorage.key(i);
-      if(key.substring(0, 10) == dayString)
-      {
-        keys.push(key);
-      }
-    }
-    keys.sort();
-    for(var i = 0; i < keys.length; i++)
+  var dayString = localStorage.getItem("latest_running_day");
+  var keys = new Array();
+  for(var i = 0; i < localStorage.length; i++){
+    var key = localStorage.key(i);
+    if(key.substring(0, 10) == dayString)
     {
-      if(keys[i].substring(14) != "その他(Auto)")
-      {
-        $("ul.panel li#tab0 div dl dd")
+      keys.push(key);
+    }
+  }
+  keys.sort();
+  for(var i = 0; i < keys.length; i++)
+  {
+    if(keys[i].substring(14) != "その他(Auto)")
+    {
+      $("ul.panel li#tab0 div dl dd")
         .append($('<br>'))
         .append($('<input type="button">').attr("id", "task_edit_delete" + NumOfTimers).addClass("delete_button"))
         .append($('<input type="text">').attr("id", "task" + NumOfTimers).attr("value", keys[i].substring(14)).addClass("task"))
         .append($('<input type="text">').attr("id", "task_time" + NumOfTimers).attr("value", getTimeString(parseInt(localStorage.getItem(keys[i])))).addClass("time"));
         NumOfTimers++;
-      }
     }
-    /*if(NumOfTimers == 0)//日付が変わって最初の実行かつ、タイマーがすべて停止中の場合、csvからロード
+  }
+
+  for(var i = 0; i < NumOfTimers + 1; i++){
+    if(i == NumOfTimers)
     {
-      var csv = $.csv()(database);
-      $(csv).each(function(index){
-        if(index != 0 && this[2] != "その他(Auto)"){
-          $("ul.panel li#tab0 div dl dd").append($('<br>')).append($('<input type="text">')
-            .attr("id", "task" + NumOfTimers).attr("value", this[2]).addClass("task"));
-          NumOfTimers++;
+      timers.push(new Timer(i, "その他(Auto)"));
+    }
+    else
+    {
+      timers.push(new Timer(i, $("input#task" + i).attr("value")));
+    }
+    $("ul.panel li#tab0").append($('<input type="button">').attr("id","button" + i)
+      .attr("value", timers[i].getTimerLabel()).addClass("timer").addClass("stop_state"));
+    if(localStorage.getItem("latest_running_day") != getTodayString())
+    {
+      localStorage.setItem("latest_running_day", getTodayString());
+    }
+    timers[i].loadFromLocalStorage(dayString);
+    timers[i].changeTimerState(0);
+    timers[i].saveToLocalStorage(dayString);
+    timersManagementArray.push("");
+  }
+
+  $("input.timer").live("click", function(){
+    var button_id = parseInt($(this).attr("id").substring(6));
+    if($(this).hasClass("stop_state"))
+    {
+      $("input.timer").each(function(){
+        if($(this).hasClass("running_state"))
+        {
+          changeState(parseInt($(this).attr("id").substring(6)));
         }
       });
-    }*/
-    for(var i = 0; i < NumOfTimers + 1; i++){
-      if(i == NumOfTimers)
-      {
-        timers.push(new Timer(i, "その他(Auto)"));
-      }
-      else
-      {
-        timers.push(new Timer(i, $("input#task" + i).attr("value")));
-      }
-      $("ul.panel li#tab0").append($('<input type="button">').attr("id","button" + i)
-        .attr("value", timers[i].getTimerLabel()).addClass("timer").addClass("stop_state"));
-      if(localStorage.getItem("latest_running_day") != getTodayString())
-      {
-        localStorage.setItem("latest_running_day", getTodayString());
-      }
-      timers[i].loadFromLocalStorage(dayString);
-      timers[i].changeTimerState(0);
-      timers[i].saveToLocalStorage(dayString);
-      timersManagementArray.push("");
+      changeState(button_id);
     }
-
-    $("input.timer").live("click", function(){
-      var button_id = parseInt($(this).attr("id").substring(6));
-      if($(this).hasClass("stop_state"))
-      {
-        $("input.timer").each(function(){
-          if($(this).hasClass("running_state"))
-          {
-            changeState(parseInt($(this).attr("id").substring(6)));
-          }
-        });
-        changeState(button_id);
-      }
-      else if(button_id != NumOfTimers){
-        changeState(button_id);
-        changeState(NumOfTimers);
-      }
-    });
-  //});
+    else if(button_id != NumOfTimers){
+      changeState(button_id);
+      changeState(NumOfTimers);
+    }
+  });
 
   $("input.open").click(function(){
     $("input.time").each(function(){
@@ -295,7 +278,6 @@ $(function(){
         timers[i].changeTimerState(0);
         $("#button" + i).attr("value", timers[i].getTimerLabel());
         timers[i].saveToLocalStorage();
-        //timers[i].changeTimerState(0);
       }
     }
     $("#floatWindow").fadeOut("fast");
@@ -736,5 +718,4 @@ $(function(){
   interval();
 
   setInterval(interval, 1000);
-
 });
